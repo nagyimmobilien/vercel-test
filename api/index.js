@@ -1,57 +1,176 @@
-const chromium = require('chrome-aws-lambda')
-const fetch = require('node-fetch')
-const puppeteer = require('puppeteer-core')
-
+const chromium = require('@sparticuz/chromium');
+const fetch = require('node-fetch');
+const puppeteer = require('puppeteer-core');
 
 const formatDate = (date) => {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
-  return `${year}.${month}.${day}`;
+  return `${year}.${month}.${day}.`;
 };
 
-const generateHTML = (properties, district, formattedStreetName, streetNumber) => {
-    const formattedDate = formatDate(new Date());
-    return `
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <meta charset="UTF-8">
-        <title>Pricelist</title>
-        <style>
-        /* Add necessary styles here */
-        </style>
-    </head>
-    <body>
-        <header>
-        <h1>${district} ${formattedStreetName} ${streetNumber}</h1>
-        </header>
-        <table>
-        <thead>
-            <tr>
-            <th>Lh.</th>
-            <th>Lakás*</th>
-            <th>Emelet</th>
-            <th>Szobák</th>
-            <th>Státusz</th>
-            </tr>
-        </thead>
-        <tbody>
-            ${properties.map(unit => `
-            <tr>
-                <td>${unit.houseNumber}</td>
-                <td>${unit.apartmentNumber}</td>
-                <td>${unit.floorNumber}</td>
-                <td>${unit.roomNumber}</td>
-                <td>${unit.status}</td>
-            </tr>`).join('')}
-        </tbody>
-        </table>
-        <footer>
-        <p>Aktualitás: ${formattedDate}</p>
-        </footer>
-    </body>
-    </html>`;
+const date = new Date();
+const formattedDate = formatDate(date);
+
+const generateHTML = (properties, district, formattedStreetName, streetNumber) => { 
+  return `
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Pricelist</title>
+    <style>
+      body { 
+        font-family: 'Averta', 'Verdana', sans-serif; 
+        margin: 0px; 
+        padding: 0px;
+      }
+      h1 { color: #191E23; }
+      table { 
+        width: 100%; 
+        margin-left: auto; 
+        margin-right: auto; 
+        border-collapse: collapse;
+      }
+
+      table td, table th {
+        border: 1px solid #191E23; 
+      }
+
+      table td:last-child, table th:last-child {
+        border-right: 1px solid #191E23; 
+      }
+      th, td {
+        font-size: 14px; 
+        border: 1px solid #191E23; 
+        padding: 4px; 
+        text-align: left; 
+        white-space: nowrap;
+      }
+      table td a {
+        color: #191E23;
+      }
+      th { 
+        background-color: #EFE8DC; 
+      }
+      header, footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        width: 100%;
+        margin-left: auto;
+        margin-right: auto;
+        margin-bottom: 10px;
+      }
+      header .center-info h1, header .center-info p{
+        text-transform: uppercase;
+        text-align: center;
+        margin: 0px;
+        padding: 0px;
+      }
+      header .center-info h1 {
+        font-size: 28px;
+      }
+      header .center-info p {
+        font-size: 20px;
+      }
+      header .right-info p {
+        margin: 0px;
+        padding: 0px;
+        font-size: 14px;
+        text-align: right;
+      }
+      footer p {
+        font-size: 14px;
+      }
+      .active-status {
+        background-color: lightgreen;
+      }
+      .inactive-status {
+        background-color: gray;
+      }
+      /* Ensure everything stays on one page */
+      @media print {
+        body {
+          page-break-before: always;
+          page-break-after: avoid;
+          margin: 0;
+        }
+        table {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div>
+        <img src="https://www.becsingatlan.com/images/bi_logo_4.png" width="250px"/>
+      </div>
+      <div class="center-info">
+        <h1>${district} ${formattedStreetName} ${streetNumber}.</h1>
+        <p>Lakás árlista</p>
+      </div>
+      <div class="right-info">
+        <p>A-1040 Wien</p>
+        <p>Brahmsplatz 7/3.OG/Top 12A</p>
+        <p>Tel: +43 664 401 6308</p>
+        <p>E-mail: office@becsingatlan.com</p>
+        <p>www.becsingatlan.com</p>
+      </div>
+    </header>
+    <table>
+      <thead>
+        <tr>
+          <th>Lh.</th>
+          <th>Lakás*</th>
+          <th>Emelet</th>
+          <th>Szobák</th>
+          <th>Alapterület (m²)</th>
+          <th>Loggia (m²)</th>
+          <th>Erkély (m²)</th>
+          <th>Terasz (m²)</th>
+          <th>Tetőterasz (m²)</th>
+          <th>Kerti terasz (m²)</th>
+          <th>Kert (m²)</th>
+          <th>Teljes külső (m²)</th>
+          <th>Összterület (m²)</th>
+          <th>Eladási ár (befektetés)</th>
+          <th>Eladási ár (saját használat)</th>
+          <th>Státusz</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${properties.map(unit => `
+          <tr>
+            <td>${unit.houseNumber}</td>
+            <td>
+              <a target="_blank" href="${unit.status === "Elérhető" ? `https://becsingatlan.com/pages/wp-content/blueprints/${unit.projectAcronym}/${unit.projectAcronym}_${unit.houseNumber}_TOP-${unit.apartmentNumber}.pdf` : null }">TOP ${unit.apartmentNumber}</a>
+            </td>
+            <td>${unit.floorNumber}</td>
+            <td>${unit.roomNumber}</td>
+            <td>${unit.livingArea}</td>
+            <td>${unit.loggiaArea}</td>
+            <td>${unit.balconyArea}</td>
+            <td>${unit.terraceArea}</td>
+            <td>${unit.roofTerraceArea}</td>
+            <td>${unit.gardenTerraceArea}</td>                                 
+            <td>${unit.gardenArea}</td>                                 
+            <td>${unit.sumOfOutsideAreas}</td>                                 
+            <td>${unit.sumOfAllAreas}</td>                                                              
+            <td>${unit.listingPriceForInvestors}</td>
+            <td>${unit.listingPriceForPersonalUse}</td>
+            <td class="${unit.status === "Elérhető" ? "active-status" : "inactive-status" }">${unit.status}</td>
+          </tr>`).join('')}
+      </tbody>
+    </table>
+    <footer>
+      <p class="text-hint">*A lakás számára kattintva megtekinthető az alaprajz.</p>
+      <p>Dátum:<strong> ${formattedDate}</strong> </p>
+    </footer>
+  </body>
+  </html>
+  `;
 };
 
 export default async function handler(req, res) {
@@ -79,10 +198,10 @@ export default async function handler(req, res) {
     const HTMLcontent = generateHTML(properties, district, formattedStreetName, streetNumber);
 
     const browser = await puppeteer.launch({
-        args: chrome.args,
-        defaultViewport: chrome.defaultViewport,
-        executablePath: await chrome.executablePath(),
-        headless: 'new',
+        args: chromium.args,
+        defaultViewport: chromium.defaultViewport,
+        executablePath: await chromium.executablePath(),
+        headless: true,
         ignoreHTTPSErrors: true
       });
   
@@ -92,19 +211,22 @@ export default async function handler(req, res) {
       const pdfBuffer = await page.pdf({
         format: 'A4',
         landscape: true,
-        printBackground: true,
+        printBackground: true, 
         margin: {
-          top: '20mm',
+          top: '20mm',    
           bottom: '20mm',
           left: '20mm',
           right: '20mm',
         },
+        scale: 0.75,  
+        width: '210mm',  
+        height: '297mm',  
       });
   
       await browser.close();
   
       res.setHeader('Content-Type', 'application/pdf');
-      res.setHeader('Content-Disposition', `attachment; filename="pricelist.pdf"`);
+      res.setHeader('Content-Disposition', `attachment; filename="${project}_arlista.pdf"`);
       res.send(pdfBuffer);
   } catch (error) {
     console.error('Error generating PDF:', error);
@@ -112,4 +234,5 @@ export default async function handler(req, res) {
   }
 }
 
-  
+
+    
