@@ -37,7 +37,7 @@ const generateHeaderElement = (projectWithUnitsAndDistrict) => {
 
       <div style="flex: 1; text-align: center;"> 
         <h1>${district?.zipCode} ${project.address}.</h1>
-        <p style="font-size: 14px;">Lakás árlista</p>
+        <p style="font-size: 14px;">Közös költség lista</p>
       </div>
 
       <div style="flex: 0 0 auto; text-align: right; line-height: 1.2;">
@@ -49,7 +49,7 @@ const generateHeaderElement = (projectWithUnitsAndDistrict) => {
       </div>
     </div>
   `;
-}
+};
 
 const generateFooterElement = () => {
   return `
@@ -83,22 +83,6 @@ const generateHTMLContent = (projectWithUnitsAndDistrict) => {
   const { district, units } = projectWithUnitsAndDistrict;
   const project = projectWithUnitsAndDistrict;
 
-  function formatEuroWithSpaces(number) {
-    return new Intl.NumberFormat('de-DE', {
-      style: 'currency',
-      currency: 'EUR',
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    })
-    .format(number)
-    .replace(/\./g, ' ');
-  }
-  
-  function formatArea(value) {
-    if (value == null || value == 0) return "-";
-    return value.toFixed(2);
-  }
-
   return `
   <!DOCTYPE html>
   <html>
@@ -106,8 +90,8 @@ const generateHTMLContent = (projectWithUnitsAndDistrict) => {
       <meta charset="UTF-8">
       <title>${project.name} – Árlista</title>
       <style>
-        body { font-family: Averta, sans-serif; font-size: 13px; }
-        table { width: 100%; border-collapse: collapse; }
+        body { font-family: Averta, sans-serif; font-size: 16px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 32px; }
         th, td { border: 1px solid #CCC; padding: 4px; text-align: center; }
         th { background-color: #FFF; }
         .active-status { color: #B7E4C7; font-weight: bold; }
@@ -123,16 +107,10 @@ const generateHTMLContent = (projectWithUnitsAndDistrict) => {
             <th>Emelet</th>
             <th>Szobák</th>
             <th>Alapterület (m²)</th>
-            <th>Loggia (m²)</th>
-            <th>Erkély (m²)</th>
-            <th>Terasz (m²)</th>
-            <th>Tetőterasz (m²)</th>
-            <th>Kerti terasz (m²)</th>
-            <th>Kert (m²)</th>
-            <th>Teljes külső (m²)</th>
-            <th>Összterület (m²)</th>
-            <th>Eladási ár (befektetés)</th>
-            <th>Eladási ár (saját)</th> 
+            <th>Lakás közös költség</th>
+            <th>Lift közös költség</th> 
+            <th>Felújítási alap összege</th>
+            <th>Teljes közös költség</th>
             <th>Státusz</th>
           </tr>
         </thead>
@@ -143,17 +121,11 @@ const generateHTMLContent = (projectWithUnitsAndDistrict) => {
             <td><a target="_blank" href="${unit.floorPlanUrlPNG || "#"}">TOP ${unit.unitNumber || ""}</a></td>
             <td>${unit.floorNumber || ""}</td>
             <td>${unit.roomNumber || ""}</td>
-            <td>${formatArea(unit.livingArea) || ""}</td>
-            <td>${formatArea(unit.loggiaArea) || "-"}</td>
-            <td>${formatArea(unit.balconyArea) || "-"}</td>
-            <td>${formatArea(unit.terraceArea) || "-"}</td>
-            <td>${formatArea(unit.roofTerraceArea) || "-"}</td>
-            <td>${formatArea(unit.gardenTerraceArea) || "-"}</td>                                 
-            <td>${formatArea(unit.gardenArea) || "-"}</td>                                 
-            <td>${formatArea(unit.sumOfOutsideAreas) || "-"}</td>                                 
-            <td>${formatArea(unit.sumOfAllAreas) || "-"}</td>                                                              
-            <td>${formatEuroWithSpaces(unit.listingPriceForInvestors) || ""}</td>
-            <td>${formatEuroWithSpaces(unit.listingPriceForPersonalUse) || ""}</td>
+            <td>${unit.livingArea || ""}</td>                                                            
+            <td>€ ${unit.commonCharges.basic.toFixed(2) || ""}</td>
+            <td>€ ${unit.commonCharges.elevator.toFixed(2) || ""}</td>
+            <td>€ ${unit.commonCharges.reserveFund.toFixed(2) || ""}</td>
+            <td>€ <b>${unit.sumOfCommonCharges || ""}</b></td>
             <td class="${unit.status === "Elérhető" ? "active-status" : "inactive-status"}">${unit.status || ""}</td>
           </tr>
         `).join('')}
@@ -201,15 +173,13 @@ export default async function handler(req, res) {
       headless: true,
       ignoreHTTPSErrors: true
     });
-     
-    /*     
-    const browser = await puppeteer.launch({
+  
+/*     const browser = await puppeteer.launch({
       executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe',
       headless: true,
       args: ['--no-sandbox', '--disable-setuid-sandbox'],
     });   */
    
-
     const page = await browser.newPage();
     const content = generateHTMLContent(projectWithUnitsAndDistrict);
 
