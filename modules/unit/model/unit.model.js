@@ -53,4 +53,4 @@ UnitSchema.virtual('floorPlanUrlPDF').get(function() {
 UnitSchema.set('toJSON', { virtuals: true });
 UnitSchema.set('toObject', { virtuals: true });
 
-export default mongoose.models.Unit || mongoose.model("Unit", UnitSchema);
+module.exports = mongoose.models.Unit || mongoose.model("Unit", UnitSchema);
