@@ -12,7 +12,7 @@ const formatDate = (date) => {
 const date = new Date();
 const formattedDate = formatDate(date);
 
-const generateHTML = (properties, district, formattedStreetName, streetNumber) => { 
+const generateHTML = (properties, project, district, formattedStreetName, streetNumber) => { 
   return `
   <!DOCTYPE html>
   <html>
@@ -108,8 +108,35 @@ const generateHTML = (properties, district, formattedStreetName, streetNumber) =
         <img src="https://www.becsingatlan.com/images/bi_logo_4.png" width="250px"/>
       </div>
       <div class="center-info">
-        <h1>${district} ${formattedStreetName} ${streetNumber}.</h1>
-        <p>Lakás árlista</p>
+        ${(() => {
+          let title = `${district} ${formattedStreetName} ${streetNumber}.`;
+          let subtitle = "Lakás árlista";
+
+          if (project === "favoritenstrasse_58") {
+            title = "1040 Favoritenstrasse 58.";
+            subtitle = "Lakás árlista";
+          } else if (project === "favoritenstrasse_office_58") {
+            title = "1040 Favoritenstrasse 58.";
+            subtitle = "Üzlethelyiségek";
+          } else if (project === "erzherzog_74") {
+            title = "1220 Erzherzog-Karl-Strasse 74";
+            subtitle = "Lakás árlista";
+          } else if (project === "wagramer_113") {
+            title = "1220 Wagramer Strasse 113";
+            subtitle = "Lakás árlista";
+          } else if (project === "gumpendorferstrasse_60") {
+            title = "1060 Gumpendorferstrasse 60.";
+            subtitle = "Lakás árlista";
+          } else if (project === "ludwig_reindl_gasse_1") {
+            title = "1220 Ludwig-Reindl-Gasse-1.";
+            subtitle = "Lakás árlista";
+          } else if (project === "peak_homes") {
+            title = "1030 Elizabeth-T.-Spira-Promenade 4";
+            subtitle = "Lakás árlista";
+          }
+
+          return `<h1>${title}</h1><p>${subtitle}</p>`;
+        })()}
       </div>
       <div class="right-info">
         <p>A-1040 Wien</p>
@@ -136,36 +163,47 @@ const generateHTML = (properties, district, formattedStreetName, streetNumber) =
           <th>Teljes külső (m²)</th>
           <th>Összterület (m²)</th>
           <th>Eladási ár (befektetés)</th>
-          <th>Eladási ár (saját használat)</th>
+          ${project === "wagramer_113" || project === "gumpendorferstrasse_60" ? `<th>Éves bérleti díj</th>` : `<th> Eladási ár (saját használat)`}
+          
           <th>Státusz</th>
         </tr>
       </thead>
       <tbody>
-        ${properties.map(unit => `
-          <tr>
-            <td>${unit.houseNumber}</td>
-            <td>
-              <a target="_blank" href="${unit.status === "Elérhető" ? `https://becsingatlan.com/pages/wp-content/blueprints/${unit.projectAcronym}/${unit.projectAcronym}_${unit.houseNumber}_TOP-${unit.apartmentNumber}.pdf` : null }">TOP ${unit.apartmentNumber}</a>
-            </td>
-            <td>${unit.floorNumber}</td>
-            <td>${unit.roomNumber}</td>
-            <td>${unit.livingArea}</td>
-            <td>${unit.loggiaArea}</td>
-            <td>${unit.balconyArea}</td>
-            <td>${unit.terraceArea}</td>
-            <td>${unit.roofTerraceArea}</td>
-            <td>${unit.gardenTerraceArea}</td>                                 
-            <td>${unit.gardenArea}</td>                                 
-            <td>${unit.sumOfOutsideAreas}</td>                                 
-            <td>${unit.sumOfAllAreas}</td>                                                              
-            <td>${unit.listingPriceForInvestors}</td>
-            <td>${unit.listingPriceForPersonalUse}</td>
-            <td class="${unit.status === "Elérhető" ? "active-status" : "inactive-status" }">${unit.status}</td>
-          </tr>`).join('')}
+        ${properties.map(unit => {
+          const blueprintLink = unit.status === "Elérhető"
+            ? `https://becsingatlan.com/pages/wp-content/blueprints/${unit.projectAcronym}/${unit.projectAcronym}_${unit.houseNumber}_TOP-${unit.apartmentNumber}.pdf`
+            : '#';
+
+          return `
+            <tr>
+              <td>${unit.houseNumber}</td>
+              <td>
+                <a target="_blank" href="${blueprintLink}">TOP ${unit.apartmentNumber}</a>
+              </td>
+              <td>${unit.floorNumber}</td>
+              <td>${unit.roomNumber}</td>
+              <td>${unit.livingArea}</td>
+              <td>${unit.loggiaArea}</td>
+              <td>${unit.balconyArea}</td>
+              <td>${unit.terraceArea}</td>
+              <td>${unit.roofTerraceArea}</td>
+              <td>${unit.gardenTerraceArea}</td>                                 
+              <td>${unit.gardenArea}</td>                                 
+              <td>${unit.sumOfOutsideAreas}</td>                                 
+              <td>${unit.sumOfAllAreas}</td>                                                              
+              <td>${unit.listingPriceForInvestors}</td>
+              <td>${unit.listingPriceForPersonalUse}</td>
+              <td class="${unit.status === "Elérhető" ? "active-status" : "inactive-status"}">${unit.status}</td>
+            </tr>
+          `;
+        }).join('')}
       </tbody>
     </table>
     <footer>
-      <p class="text-hint">*A lakás számára kattintva megtekinthető az alaprajz.</p>
+      <p class="text-hint">
+      *A lakás számára kattintva megtekinthető az alaprajz.</br>
+      **A jelen árlista adatai tájékoztató jellegűek, a változtatások és eltérések jogát fenntartjuk.
+      </p>
       <p>Dátum:<strong> ${formattedDate}</strong> </p>
     </footer>
   </body>
@@ -174,9 +212,14 @@ const generateHTML = (properties, district, formattedStreetName, streetNumber) =
 };
 
 export default async function handler(req, res) {
+
+  res.setHeader('Access-Control-Allow-Origin', 'https://becsingatlan.com');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
   try {
     const { district, project } = req.query;
-
+    console.log(req.query)
     if (!district || !project) {
         return res.status(400).send('Missing required query parameters: district or project.');
     }
@@ -195,7 +238,7 @@ export default async function handler(req, res) {
     }
 
     const properties = await result.json();
-    const HTMLcontent = generateHTML(properties, district, formattedStreetName, streetNumber);
+    const HTMLcontent = generateHTML(properties, project, district, formattedStreetName, streetNumber);
 
     const browser = await puppeteer.launch({
         args: chromium.args,

@@ -12,7 +12,7 @@ const formatDate = (date) => {
 const date = new Date();
 const formattedDate = formatDate(date);
 
-const generateHTML = (project, properties, district, formattedStreetName, streetNumber) => { 
+const generateHTML = (properties, district, formattedStreetName, streetNumber) => { 
   const projectAcronym = properties[0]?.projectAcronym || 'defaultAcronym';
   return `
   <!DOCTYPE html>
@@ -119,20 +119,8 @@ const generateHTML = (project, properties, district, formattedStreetName, street
         <img src="https://www.becsingatlan.com/images/bi_logo_4.png" width="250px"/>
       </div>
       <div class="center-info">
-        ${(() => {
-          let title = `${district} ${formattedStreetName} ${streetNumber}.`;
-          let subtitle = "Garázs árlista";
-
-          if (project === "erzherzog_74") {
-            title = "1220 Erzherzog-Karl-Strasse 74";
-            subtitle = "Garázs árlista";
-          } else if (project === "ludwig_reindl_gasse_1") {
-            title = "1220 Ludwig-Reindl-Gasse 1";
-            subtitle = "Garázs árlista";
-          }
-
-          return `<h1>${title}</h1><p>${subtitle}</p>`;
-        })()}
+        <h1>${district} ${formattedStreetName} ${streetNumber}.</h1>
+        <p>Közös költség kimutatás</p>
       </div>
       <div class="right-info">
         <p>A-1040 Wien</p>
@@ -146,9 +134,12 @@ const generateHTML = (project, properties, district, formattedStreetName, street
       <thead>
         <tr>
           <th>Lh.</th>
-          <th>Parkolóhely</th>
-          <th>Eladási ár (befektetés)</th>
-          <th>Eladási ár (saját használat)</th>
+          <th>Lakás</th>
+          <th>Alapterület (m²)</th>
+          <th>Lakás közös költség</th>
+          <th>Lift közös költség</th>
+          <th>Felújítási alap</th>
+          <th>Közös költség összesen</th>
           <th>Státusz</th>
         </tr>
       </thead>
@@ -156,9 +147,11 @@ const generateHTML = (project, properties, district, formattedStreetName, street
         ${properties.map(unit => `
           <tr>
             <td>${unit.houseNumber}</td>
-            <td>KFZ ${unit.parkingNumber}</td>                                                            
-            <td>${unit.listingPriceForInvestors}</td>
-            <td>${unit.listingPriceForPersonalUse}</td>
+            <td>TOP ${unit.apartmentNumber}</td>                                                      
+            <td>${(unit.commonCharges.netCommonCharges).toFixed(2).replace('.', ',')}</td>
+            <td>${(unit.commonCharges.elevatorCommonCharges).toFixed(2).replace('.', ',')}</td>
+            <td>${(unit.commonCharges.reserveFundCommonCharges).toFixed(2).replace('.', ',')}</td>
+            <td>${(unit.commonCharges.reserveFundCommonCharges + unit.commonCharges.elevatorCommonCharges + unit.commonCharges.netCommonCharges).toFixed(2).replace('.', ',')}</td>
             <td class="${unit.status === "Elérhető" ? "active-status" : "inactive-status" }">${unit.status}</td>
           </tr>`).join('')}
       </tbody>
@@ -166,21 +159,8 @@ const generateHTML = (project, properties, district, formattedStreetName, street
     <footer>
       <p>Dátum:<strong> ${formattedDate}</strong></p>
     </footer>
-    ${(() => {
-      if (project === "krottenbachstrasse_182") {
-        return `
-          <div class="page-break"></div>
-          <img class="layout-image" src="https://becsingatlan.com/pages/wp-content/garage/${projectAcronym}/${projectAcronym}_Garagenplan_1.png" alt="Garage layout 1"/>
-          <div class="page-break"></div>
-          <img class="layout-image" src="https://becsingatlan.com/pages/wp-content/garage/${projectAcronym}/${projectAcronym}_Garagenplan_2.png" alt="Garage layout 2"/>
-        `;
-      } else {
-        return `
-          <div class="page-break"></div>
-          <img class="layout-image" src="https://becsingatlan.com/pages/wp-content/garage/${projectAcronym}/${projectAcronym}_Garagenplan.png" alt="Garage layout"/>
-        `;
-      }
-    })()}
+    <div class="page-break"></div>
+    <img class="layout-image" src="https://becsingatlan.com/pages/wp-content/garage/${projectAcronym}/${projectAcronym}_Garagenplan.png" alt="Garage layout"/>
   </body>
   </html>
   `;
@@ -213,20 +193,15 @@ export default async function handler(req, res) {
     }
 
     const properties = await result.json();
-    const HTMLcontent = generateHTML(project, properties, district, formattedStreetName, streetNumber);
-    
-    console.log("Chromium executable path:", await chromium.executablePath());
-    
+    const HTMLcontent = generateHTML(properties, district, formattedStreetName, streetNumber);
+
     const browser = await puppeteer.launch({
         args: chromium.args,
         defaultViewport: chromium.defaultViewport,
         executablePath: await chromium.executablePath(),
         headless: true,
         ignoreHTTPSErrors: true
-      });    
-      
-    console.log("Chromium executable path:", await chromium.executablePath());
-
+      });
   
       const page = await browser.newPage();
       await page.setContent(HTMLcontent, { waitUntil: 'networkidle0' });
