@@ -1,5 +1,5 @@
-const { connectDB } = require("../../config/database/mongodb");
-const { District } = require("../../modules/district/model/district.model");
+const connectDB = require("../../config/database/mongodb");
+const District  = require("../../modules/district/model/district.model");
 
 export default async function handler(req, res) {
   try {

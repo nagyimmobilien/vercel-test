@@ -6,4 +6,4 @@ const DistrictSchema = new mongoose.Schema({
   projects: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Project', default: [] }]
 }, { timestamps: true });
 
-export default mongoose.models.District || mongoose.model("District", DistrictSchema);
+module.exports = mongoose.models.District || mongoose.model("District", DistrictSchema);
