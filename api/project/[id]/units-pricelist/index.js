@@ -193,20 +193,20 @@ export default async function handler(req, res) {
       district: project.district || {}
     };
 
-/*     const browser = await puppeteer.launch({
-        args: chromium.args,
-        defaultViewport: chromium.defaultViewport,
-        executablePath: await chromium.executablePath(),
-        headless: true,
-        ignoreHTTPSErrors: true
-      }); */
+    const browser = await puppeteer.launch({
+      args: chromium.args,
+      defaultViewport: chromium.defaultViewport,
+      executablePath: await chromium.executablePath(),
+      headless: true,
+      ignoreHTTPSErrors: true
+    });
   
               
-    const browser = await puppeteer.launch({
+/*     const browser = await puppeteer.launch({
       executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe',
       headless: true,
       args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    }); 
+    });  */
 
     const page = await browser.newPage();
     const content = generateHTMLContent(projectWithUnitsAndDistrict);
