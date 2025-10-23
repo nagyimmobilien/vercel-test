@@ -2,6 +2,13 @@ const connectDB = require("../../config/database/mongodb");
 const Project  = require("../../modules/project/model/project.model");
 
 export default async function handler(req, res) {
+
+  res.setHeader('Access-Control-Allow-Origin', 'https://becsingatlan.com');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method === 'OPTIONS') return res.status(200).end();
+
   try {
     await connectDB();
 
@@ -9,7 +16,7 @@ export default async function handler(req, res) {
     
     res.status(200).json(projects);
   } catch (err) {
-    console.error("Failed to fetch projects::", err);
+    console.error("Failed to fetch projects:", err);
     res.status(500).json({ error: "Failed to fetch projects" });
   }
 }
