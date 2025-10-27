@@ -3,12 +3,11 @@ const Project = require("../../../../modules/project/model/project.model");
 const Unit = require("../../../../modules/unit/model/unit.model");
 
 export default async function handler(req, res) {
-  // CORS headers
+
   res.setHeader('Access-Control-Allow-Origin', 'https://becsingatlan.com');
   res.setHeader('Access-Control-Allow-Methods', 'GET, PATCH, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  // Preflight
   if (req.method === 'OPTIONS') return res.status(200).end();
 
   const { id } = req.query;
@@ -24,7 +23,7 @@ export default async function handler(req, res) {
     }
 
     if (req.method === "PATCH") {
-      const updates = req.body; // array of { _id, status, ... }
+      const updates = req.body;
       if (!Array.isArray(updates)) return res.status(400).json({ error: "Body must be an array" });
 
       const results = [];

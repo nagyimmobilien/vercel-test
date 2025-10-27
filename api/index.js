@@ -133,6 +133,9 @@ const generateHTML = (properties, project, district, formattedStreetName, street
           } else if (project === "peak_homes") {
             title = "1030 Elizabeth-T.-Spira-Promenade 4";
             subtitle = "Lakás árlista";
+          } else if (project === "park_homes") {
+            title = "1030 Leo-Perutz-Promenade 2-4";
+            subtitle = "Lakás árlista";
           }
 
           return `<h1>${title}</h1><p>${subtitle}</p>`;

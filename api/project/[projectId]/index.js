@@ -2,16 +2,16 @@ const connectDB = require("../../../config/database/mongodb");
 const Project = require("../../../modules/project/model/project.model");
 
 export default async function handler(req, res) {
-  const { id } = req.query;
+  const { projectId } = req.query;
 
-  if (!id || typeof id !== "string") {
+  if (!projectId || typeof projectId !== "string") {
     return res.status(400).json({ error: "Invalid project ID" });
   }
 
   try {
     await connectDB();
 
-    const project = await Project.findById(id);
+    const project = await Project.findById(projectId);
 
     if (!project) {
       return res.status(404).json({ error: "Project not found" });
