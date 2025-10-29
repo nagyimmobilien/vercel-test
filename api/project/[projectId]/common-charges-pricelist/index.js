@@ -142,15 +142,15 @@ export default async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-    const { id } = req.query;
+    const { projectId } = req.query;
 
-    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+    if (!projectId || !mongoose.Types.ObjectId.isValid(projectId)) {
       return res.status(400).json({ error: "Invalid project ID" });
     }
 
     await connectDB();
 
-    const project = await Project.findById(id)
+    const project = await Project.findById(projectId)
       .populate("units")
       .populate("district")
 
