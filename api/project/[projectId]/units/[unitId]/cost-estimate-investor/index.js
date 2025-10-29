@@ -191,10 +191,11 @@ const generateHTMLContent = (unitWithProject) => {
 };
 
 export default async function handler(req, res) {
+  res.setHeader('Access-Control-Allow-Origin', 'https://becsingatlan.com');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
   try {
-    res.setHeader('Access-Control-Allow-Origin', 'https://becsingatlan.com');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
     const { unitId } = req.query;
 
@@ -224,21 +225,21 @@ export default async function handler(req, res) {
 
     const unitWithProject = { unit: unitOnly, project: projectData, district: districtData };
 
-/* 
+
     const browser = await puppeteer.launch({
       args: chromium.args,
       defaultViewport: chromium.defaultViewport,
       executablePath: await chromium.executablePath(),
       headless: true,
       ignoreHTTPSErrors: true
-    }); */
+    });
      
-        
+    /*     
     const browser = await puppeteer.launch({
       executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe',
       headless: true,
       args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    });  
+    });   */
    
 
     const page = await browser.newPage();
