@@ -37,7 +37,7 @@ const generateHeaderElement = (projectWithUnitsAndDistrict) => {
 
       <div style="flex: 1; text-align: center;"> 
         <h1>${district?.zipCode} ${project.address}.</h1>
-        <p style="font-size: 14px;">Közös költség lista</p>
+        <p style="font-size: 14px;">Közös költség árlista</p>
       </div>
 
       <div style="flex: 0 0 auto; text-align: right; line-height: 1.2;">
@@ -92,10 +92,11 @@ const generateHTMLContent = (projectWithUnitsAndDistrict) => {
       <style>
         body { font-family: Averta, sans-serif; font-size: 16px; }
         table { width: 100%; border-collapse: collapse; margin-top: 32px; }
-        th, td { border: 1px solid #CCC; padding: 4px; text-align: center; }
+        th, td { border: 1px solid #CCC; padding: 4px; text-align: center; white-space: nowrap; overflow: hidden; overflow: hidden; }
         th { background-color: #FFF; }
         .active-status { color: #B7E4C7; font-weight: bold; }
         .inactive-status { color: #E57373; font-weight: bold; }
+        td a { color: #000; }
       </style>
     </head>
     <body>
@@ -165,20 +166,20 @@ export default async function handler(req, res) {
       units: projectData.units || [],
       district: projectData.district || {}
     };
-
+/* 
     const browser = await puppeteer.launch({
       args: chromium.args,
       defaultViewport: chromium.defaultViewport,
       executablePath: await chromium.executablePath(),
       headless: true,
       ignoreHTTPSErrors: true
-    });
+    }); */
   
-/*     const browser = await puppeteer.launch({
+    const browser = await puppeteer.launch({
       executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe',
       headless: true,
       args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    });   */
+    });  
    
     const page = await browser.newPage();
     const content = generateHTMLContent(projectWithUnitsAndDistrict);
@@ -187,7 +188,7 @@ export default async function handler(req, res) {
 
     const pdfBuffer = await page.pdf({
       format: 'A4',
-      landscape: true,
+      landscape: false,
       margin: { top: "100px", bottom: "100px", left: "34px", right: "34px" },
       scale: 0.75,
       displayHeaderFooter: true,

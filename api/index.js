@@ -136,6 +136,12 @@ const generateHTML = (properties, project, district, formattedStreetName, street
           } else if (project === "park_homes") {
             title = "1030 Leo-Perutz-Promenade 2-4";
             subtitle = "Lakás árlista";
+          } else if (project === "breitenfurterstrasse_434") {
+            title = "1230 Breitenfurter Straße 434";
+            subtitle = "Lakás árlista";
+          } else if (project === "laaer_berg_strasse_100") {
+            title = "1100 Laaer-Berg-Strasse 100";
+            subtitle = "Lakás árlista";
           }
 
           return `<h1>${title}</h1><p>${subtitle}</p>`;

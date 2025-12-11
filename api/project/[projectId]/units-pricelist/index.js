@@ -113,6 +113,10 @@ const generateHTMLContent = (projectWithUnitsAndDistrict) => {
         .active-status { color: #B7E4C7; font-weight: bold; }
         .inactive-status { color: #E57373; font-weight: bold; }
       </style>
+      <style>
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border-bottom: 1px solid #CCC; padding: 4px; text-align:center; white-space: nowrap; overflow: hidden; overflow: hidden; }
+      </style>
     </head>
     <body>
       <table>
@@ -193,16 +197,15 @@ export default async function handler(req, res) {
       units: projectData.units || [],
       district: projectData.district || {}
     };
-
-/*     const browser = await puppeteer.launch({
+/* 
+    const browser = await puppeteer.launch({
       args: chromium.args,
       defaultViewport: chromium.defaultViewport,
       executablePath: await chromium.executablePath(),
       headless: true,
       ignoreHTTPSErrors: true
     }); */
-     
-        
+
     const browser = await puppeteer.launch({
       executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe',
       headless: true,
