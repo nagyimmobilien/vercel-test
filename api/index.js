@@ -142,6 +142,9 @@ const generateHTML = (properties, project, district, formattedStreetName, street
           } else if (project === "laaer_berg_strasse_100") {
             title = "1100 Laaer-Berg-Strasse 100";
             subtitle = "Lakás árlista";
+          } else if (project === "fahrbachgasse_6") {
+            title = "1210 Fahrbachgasse 6-8";
+            subtitle = "Lakás árlista";
           }
 
           return `<h1>${title}</h1><p>${subtitle}</p>`;
