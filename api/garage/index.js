@@ -189,6 +189,13 @@ const generateHTML = (project, properties, district, formattedStreetName, street
           <div class="page-break"></div>
           <img class="layout-image" src="https://becsingatlan.com/pages/wp-content/garage/${projectAcronym}/${projectAcronym}_Garagenplan_2.png" alt="Garage layout 2"/>
         `;
+      } else if (project === "fahrbachgasse_6") {
+        return `
+          <div class="page-break"></div>
+          <img class="layout-image" src="https://becsingatlan.com/pages/wp-content/garage/${projectAcronym}/${projectAcronym}_Garagenplan_1.png" alt="Garage layout 1"/>
+          <div class="page-break"></div>
+          <img class="layout-image" src="https://becsingatlan.com/pages/wp-content/garage/${projectAcronym}/${projectAcronym}_Garagenplan_2.png" alt="Garage layout 2"/>
+        `;
       } else {
         return `
           <div class="page-break"></div>
